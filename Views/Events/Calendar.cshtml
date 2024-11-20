@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Event Calendar";
+}
+
+<h2>Event Calendar</h2>
+
+<!-- FullCalendar integration or any calendar solution -->
+<div id="calendar"></div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+
+    <script>
+        var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            events: '/Events/GetEvents',  // Ensure this endpoint returns the events as JSON
+            initialView: 'dayGridMonth'
+        });
+
+        calendar.render();
+    </script>
+}

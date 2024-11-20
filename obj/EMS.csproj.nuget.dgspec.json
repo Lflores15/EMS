@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/louisflores/Documents/School/Internet Programming/EMS-Project/EMS/EMS/EMS/EMS.csproj": {}
+    "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj": {}
   },
   "projects": {
-    "/Users/louisflores/Documents/School/Internet Programming/EMS-Project/EMS/EMS/EMS/EMS.csproj": {
+    "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/louisflores/Documents/School/Internet Programming/EMS-Project/EMS/EMS/EMS/EMS.csproj",
+        "projectUniqueName": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj",
         "projectName": "EMS",
-        "projectPath": "/Users/louisflores/Documents/School/Internet Programming/EMS-Project/EMS/EMS/EMS/EMS.csproj",
-        "packagesPath": "/Users/louisflores/.nuget/packages/",
-        "outputPath": "/Users/louisflores/Documents/School/Internet Programming/EMS-Project/EMS/EMS/EMS/obj/",
+        "projectPath": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj",
+        "packagesPath": "C:\\Users\\lflores47\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/louisflores/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\lflores47\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,12 +38,29 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "direct"
-        }
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -61,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

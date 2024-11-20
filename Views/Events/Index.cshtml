@@ -1,0 +1,19 @@
+@model IEnumerable<EMS.Models.Event>
+
+<h2>Events</h2>
+<a href="/Events/Create">Create New Event</a>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Location</th>
+    </tr>
+    @foreach (var evt in Model)
+    {
+        <tr>
+            <td>@evt.Name</td>
+            <td>@evt.Date.ToShortDateString()</td>
+            <td>@evt.Location</td>
+        </tr>
+    }
+</table>
