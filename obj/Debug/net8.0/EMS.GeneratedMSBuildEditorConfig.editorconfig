@@ -32,8 +32,16 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/lflores47/OneDrive - Texas A&M University-Corpus Christi/School/Code/Internet Programming/EMS/Views/Account/LoginSuccessful.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpblN1Y2Nlc3NmdWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/lflores47/OneDrive - Texas A&M University-Corpus Christi/School/Code/Internet Programming/EMS/Views/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lflores47/OneDrive - Texas A&M University-Corpus Christi/School/Code/Internet Programming/EMS/Views/Account/SignupSuccessful.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxTaWdudXBTdWNjZXNzZnVsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/lflores47/OneDrive - Texas A&M University-Corpus Christi/School/Code/Internet Programming/EMS/Views/Events/Calendar.cshtml]

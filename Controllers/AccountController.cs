@@ -1,80 +1,111 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using EMS.Models;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System.Text;
 
 namespace EMS.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        // In-memory "database" for users (in production, you'd store this in a real database)
+        private static List<User> users = new List<User>();
 
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-        }
-
-        // Sign Up - Display Form
-        [HttpGet]
+        // GET: /Account/Register
         public IActionResult Register()
         {
             return View();
         }
 
-        // Sign Up - Handle Form Submission
+        // POST: /Account/Register
         [HttpPost]
-        public async Task<IActionResult> Register(Registration model)
+        public IActionResult Register(Registration model)
         {
-            if (ModelState.IsValid)
+            // Check if the passwords match
+            if (model.Password != model.ConfirmPassword)
             {
-                var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                ViewBag.Error = "Passwords do not match.";
+                return View();
             }
-            return View(model);
+
+            // Check if the email already exists
+            if (users.Exists(u => u.Email == model.Email))
+            {
+                ViewBag.Error = "Email already exists.";
+                return View();
+            }
+
+            // Hash the password for security purposes
+            string passwordHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: model.Password,
+                salt: Encoding.UTF8.GetBytes(model.Email),
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8));
+
+            // Split full name into first and last names (assuming space separation)
+            var nameParts = model.FullName.Split(' ');
+            var firstName = nameParts.Length > 0 ? nameParts[0] : "";
+            var lastName = nameParts.Length > 1 ? nameParts[1] : "";
+
+            // Create a new user and add to the "database"
+            var newUser = new User
+            {
+                Email = model.Email,
+                PasswordHash = passwordHash,
+                Role = "User", // Default role for new users
+                Name = model.FullName // Store full name
+            };
+            users.Add(newUser);
+
+            // Set session variable for the logged-in user
+            HttpContext.Session.SetString("Email", model.Email);
+
+            // Redirect to the Home page or another page
+            return RedirectToAction("Index", "Home");
         }
 
-        // Login - Display Form
-        [HttpGet]
+        // GET: /Account/Login
         public IActionResult Login()
         {
             return View();
         }
 
-        // Login - Handle Form Submission
+        // POST: /Account/Login
         [HttpPost]
-        public async Task<IActionResult> Login(Login model)
+        public IActionResult Login(string email, string password)
         {
-            if (ModelState.IsValid)
+            // Find the user by email
+            var user = users.FirstOrDefault(u => u.Email == email);
+
+            if (user != null)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
-                
-                if (result.Succeeded)
+                // Verify the password hash
+                string hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                    password: password,
+                    salt: Encoding.UTF8.GetBytes(email),
+                    prf: KeyDerivationPrf.HMACSHA256,
+                    iterationCount: 10000,
+                    numBytesRequested: 256 / 8));
+
+                if (user.PasswordHash == hashedPassword)
                 {
+                    // Set session variable for the logged-in user
+                    HttpContext.Session.SetString("Email", email);
                     return RedirectToAction("Index", "Home");
                 }
-
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
-            return View(model);
+
+            ViewBag.Error = "Invalid login attempt.";
+            return View();
         }
 
-        // Logout
-        public async Task<IActionResult> Logout()
+        // GET: /Account/Logout
+        public IActionResult Logout()
         {
-            await _signInManager.SignOutAsync();
+            // Clear session on logout
+            HttpContext.Session.Remove("Email");
             return RedirectToAction("Index", "Home");
         }
     }
