@@ -1,0 +1,17 @@
+@model EMS.Models.User
+
+@{
+    ViewData["Title"] = "Account Details";
+}
+
+<h2>Account Details</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Name</h5>
+        <p class="card-text"><strong>Email:</strong> @Model.Email</p>
+        <p class="card-text"><strong>Role:</strong> @Model.Role</p>
+    </div>
+</div>
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Go to Home</a>

@@ -2,5 +2,7 @@
     ViewData["Title"] = "Login Successful";
 }
 
-<h2>Welcome, @ViewBag.FirstName @ViewBag.LastName</h2>
-<p>You have successfully logged in.</p>
+<h2>Login Successful</h2>
+<p>You have successfully logged in. Welcome back!</p>
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-primary">Go to Home</a>

@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using EMS.Models;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EMS.Data
 {
