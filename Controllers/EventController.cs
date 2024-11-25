@@ -1,10 +1,12 @@
-using EMS.Data;
 using EMS.Models;
+using EMS.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EMS.Controllers
 {
+    [Authorize]
     public class EventsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -12,6 +14,37 @@ namespace EMS.Controllers
         public EventsController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        // GET: Events
+        public async Task<IActionResult> Index()
+        {
+            var events = await _context.Events.ToListAsync();
+            return View(events);
+        }
+
+        // GET: Events/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var eventItem = await _context.Events
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the user has the right role to edit the event
+            var userRole = User.IsInRole("Admin") || User.Identity.Name == eventItem.Organizer;
+
+            ViewBag.CanEdit = userRole;  // Pass this to the view to determine if the user can edit
+
+            return View(eventItem);
         }
 
         // GET: Events/Create
@@ -23,44 +56,127 @@ namespace EMS.Controllers
         // POST: Events/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Name,Description,Date,Location")] Event eventModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Date,Location,Organizer")] Event eventItem)
         {
             if (ModelState.IsValid)
             {
-                // Add event to the database
-                _context.Add(eventModel);
-                _context.SaveChanges();
-                
-                // Redirect to the events index page after successful creation
-                return RedirectToAction(nameof(Index)); // Or any page you want to show
+                // Automatically set the organizer to the current signed-in user
+                eventItem.Organizer = User.Identity.Name;
+
+                _context.Add(eventItem);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            return View(eventModel); // In case of error, return the same page
+            return View(eventItem);
         }
 
-        // GET: Events/Index - Display list of events
-        public IActionResult Index()
+        // GET: Events/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            var events = _context.Events.ToList(); // Retrieve all events from the database
-            return View(events); // Pass events to the view
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var eventItem = await _context.Events.FindAsync(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the user is authorized to edit this event
+            if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
+            {
+                return Forbid(); // or redirect to an unauthorized page
+            }
+
+            return View(eventItem);
         }
 
-        // GET: Events/Calendar - Display calendar view
+        // POST: Events/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,Location,Organizer")] Event eventItem)
+        {
+            if (id != eventItem.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Ensure the organizer is not changed by the user
+                    if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
+                    {
+                        return Forbid(); // or redirect to an unauthorized page
+                    }
+
+                    _context.Update(eventItem);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!EventExists(eventItem.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(eventItem);
+        }
+
+        // GET: Events/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var eventItem = await _context.Events
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            // Ensure the organizer or admin can delete the event
+            if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            return View(eventItem);
+        }
+
+        // POST: Events/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var eventItem = await _context.Events.FindAsync(id);
+            _context.Events.Remove(eventItem);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool EventExists(int id)
+        {
+            return _context.Events.Any(e => e.Id == id);
+        }
+
+        // GET: Events/Calendar
         public IActionResult Calendar()
         {
-            return View(); // Render the Calendar view
-        }
-
-        // GET: Events/GetEvents - Get event data for the calendar
-        public IActionResult GetEvents()
-        {
-            var events = _context.Events.Select(e => new
-            {
-                title = e.Name,
-                start = e.Date.ToString("yyyy-MM-dd"),
-                location = e.Location
-            }).ToList();
-
-            return Json(events); // Return events in JSON format
+            var events = _context.Events.ToList(); // Retrieve events to display in the calendar
+            return View(events);
         }
     }
 }

@@ -7,16 +7,43 @@
 <!-- FullCalendar integration or any calendar solution -->
 <div id="calendar"></div>
 
+<!-- Modal for event details -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <h3 id="eventTitle"></h3>
+        <p><strong>Description:</strong> <span id="eventDescription"></span></p>
+        <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+        <p><strong>Organizer:</strong> <span id="eventOrganizer"></span></p>
+        <button id="closeModal">Close</button>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
-
+    
     <script>
         var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
             events: '/Events/GetEvents',  // Ensure this endpoint returns the events as JSON
-            initialView: 'dayGridMonth'
+            initialView: 'dayGridMonth',
+            eventClick: function(info) {
+                // Populate the modal with event details
+                document.getElementById('eventTitle').innerText = info.event.title;
+                document.getElementById('eventDescription').innerText = info.event.extendedProps.description;
+                document.getElementById('eventLocation').innerText = info.event.extendedProps.location;
+                document.getElementById('eventOrganizer').innerText = info.event.extendedProps.organizer;
+
+                // Show the modal
+                document.getElementById('eventModal').style.display = 'flex';  // Use 'flex' here
+            }
         });
 
+        // Render the calendar
         calendar.render();
+
+        // Close the modal when the user clicks "Close"
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('eventModal').style.display = 'none';
+        });
     </script>
 }
