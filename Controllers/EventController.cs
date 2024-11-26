@@ -1,12 +1,11 @@
-using EMS.Models;
-using EMS.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EMS.Data;
+using EMS.Models;
 
 namespace EMS.Controllers
 {
-    [Authorize]
     public class EventsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,14 +15,14 @@ namespace EMS.Controllers
             _context = context;
         }
 
-        // GET: Events
+        // GET: Events - All authenticated users can access this
         public async Task<IActionResult> Index()
         {
             var events = await _context.Events.ToListAsync();
             return View(events);
         }
 
-        // GET: Events/Details/5
+        // GET: Events/Details/5 - All authenticated users can view event details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -39,30 +38,29 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
-            // Check if the user has the right role to edit the event
+            // Check if the user can edit the event (admin or organizer)
             var userRole = User.IsInRole("Admin") || User.Identity.Name == eventItem.Organizer;
-
             ViewBag.CanEdit = userRole;  // Pass this to the view to determine if the user can edit
 
             return View(eventItem);
         }
 
-        // GET: Events/Create
+        // GET: Events/Create - Only logged-in users can create events
+        [Authorize]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Events/Create
+        // POST: Events/Create - Only logged-in users can create events
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,Date,Location,Organizer")] Event eventItem)
         {
             if (ModelState.IsValid)
             {
-                // Automatically set the organizer to the current signed-in user
-                eventItem.Organizer = User.Identity.Name;
-
+                eventItem.Organizer = User.Identity.Name; // Set the organizer to the current signed-in user
                 _context.Add(eventItem);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -70,7 +68,8 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // GET: Events/Edit/5
+        // GET: Events/Edit/5 - Only the event organizer or admin can edit
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,18 +83,19 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
-            // Check if the user is authorized to edit this event
+            // Ensure only the organizer or admin can edit
             if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
             {
-                return Forbid(); // or redirect to an unauthorized page
+                return Forbid();
             }
 
             return View(eventItem);
         }
 
-        // POST: Events/Edit/5
+        // POST: Events/Edit/5 - Only the event organizer or admin can edit
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,Location,Organizer")] Event eventItem)
         {
             if (id != eventItem.Id)
@@ -107,10 +107,10 @@ namespace EMS.Controllers
             {
                 try
                 {
-                    // Ensure the organizer is not changed by the user
+                    // Ensure only the organizer or admin can update
                     if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
                     {
-                        return Forbid(); // or redirect to an unauthorized page
+                        return Forbid();
                     }
 
                     _context.Update(eventItem);
@@ -132,7 +132,8 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // GET: Events/Delete/5
+        // GET: Events/Delete/5 - Only the event organizer or admin can delete
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -147,7 +148,7 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
-            // Ensure the organizer or admin can delete the event
+            // Ensure only the organizer or admin can delete
             if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -156,9 +157,10 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // POST: Events/Delete/5
+        // POST: Events/Delete/5 - Only the event organizer or admin can delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var eventItem = await _context.Events.FindAsync(id);
@@ -172,11 +174,30 @@ namespace EMS.Controllers
             return _context.Events.Any(e => e.Id == id);
         }
 
-        // GET: Events/Calendar
+        // GET: Events/Calendar - Only logged-in users can view the calendar
+        [Authorize]
         public IActionResult Calendar()
         {
             var events = _context.Events.ToList(); // Retrieve events to display in the calendar
             return View(events);
+        }
+
+        // New action for admin to confirm or deny events
+        [Authorize(Roles = "Admin")]  // Only admins can confirm/deny events
+        public async Task<IActionResult> ConfirmEvent(int id, bool isConfirmed)
+        {
+            var eventItem = await _context.Events.FindAsync(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            eventItem.IsConfirmed = isConfirmed;
+            _context.Update(eventItem);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = isConfirmed ? "Event confirmed." : "Event denied.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

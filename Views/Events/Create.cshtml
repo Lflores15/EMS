@@ -4,43 +4,24 @@
     ViewData["Title"] = "Create Event";
 }
 
-<h1>Create Event</h1>
-
 <form asp-action="Create" method="post">
-    <div>
-        <label asp-for="Name"></label>
-        <input asp-for="Name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="form-group">
+        <label for="Name">Event Name</label>
+        <input asp-for="Name" class="form-control" id="Name" required />
     </div>
-
-    <div>
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
+    <div class="form-group">
+        <label for="Description">Event Description</label>
+        <input asp-for="Description" class="form-control" id="Description" required />
     </div>
-
-    <div>
-        <label asp-for="Date"></label>
-        <input asp-for="Date" type="datetime-local" />
-        <span asp-validation-for="Date" class="text-danger"></span>
+    <div class="form-group">
+        <label for="Date">Event Date</label>
+        <input asp-for="Date" type="datetime-local" class="form-control" id="Date" required />
     </div>
-
-    <div>
-        <label asp-for="Location"></label>
-        <input asp-for="Location" />
-        <span asp-validation-for="Location" class="text-danger"></span>
+    <div class="form-group">
+        <label for="Location">Event Location</label>
+        <input asp-for="Location" class="form-control" id="Location" required />
     </div>
-
-    <div>
-        <label asp-for="Organizer"></label>
-        <!-- Organizer field is pre-filled with the logged-in user's information (username or email) -->
-        <input asp-for="Organizer" value="@Model.Organizer" />
-        <span asp-validation-for="Organizer" class="text-danger"></span>
-    </div>
-
-    <button type="submit">Create</button>
+    <input asp-for="Organizer" type="hidden" value="@User.Identity.Name" /> <!-- Automatically sets the organizer to the current logged-in user -->
+    
+    <button type="submit" class="btn btn-primary">Create Event</button>
 </form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
