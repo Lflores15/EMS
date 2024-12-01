@@ -1,0 +1,44 @@
+@model IEnumerable<EMS.Models.Event>
+
+@{
+    ViewData["Title"] = "Admin Console - Event Management";
+}
+
+<h2>Admin Console</h2>
+
+<p>
+    <a href="@Url.Action("Create", "Events")" class="btn btn-success">Create New Event</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Organizer</th>
+            <th>Confirmed</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var eventItem in Model)
+        {
+            <tr>
+                <td>@eventItem.Name</td>
+                <td>@eventItem.Description</td>
+                <td>@eventItem.Date.ToString("MM/dd/yyyy")</td>
+                <td>@eventItem.Location</td>
+                <td>@eventItem.Organizer</td>
+                <td>@(eventItem.IsConfirmed ? "Yes" : "No")</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Admin", new { id = eventItem.Id })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("Delete", "Admin", new { id = eventItem.Id })" class="btn btn-danger">Delete</a>
+                    <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = true })" class="btn btn-success">Confirm</a>
+                    <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = false })" class="btn btn-secondary">Deny</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

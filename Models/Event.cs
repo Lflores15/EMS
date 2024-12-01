@@ -8,5 +8,8 @@ namespace EMS.Models
         public DateTime Date { get; set; }
         public string Location { get; set; }
         public string Organizer { get; set; }
+
+        // New property to track event confirmation status
+        public bool IsConfirmed { get; set; }  // Default is false (unconfirmed)
     }
 }

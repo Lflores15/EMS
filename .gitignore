@@ -1,0 +1,64 @@
+# ASP.NET Core
+bin/
+obj/
+wwwroot/
+
+# User Secrets (development secrets)
+secrets.json
+
+# User configuration files
+appsettings.Development.json
+appsettings.json
+
+# Environment variables (not for production)
+.env
+
+# IDE and editor directories and files
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Microsoft Azure credentials and config files
+*.publishsettings
+
+# Docker
+.docker/
+docker-compose.override.yml
+Dockerfile*
+
+# .NET build output
+*.dll
+*.exe
+*.pdb
+*.cache
+*.gz
+*.zip
+*.tar
+*.tar.gz
+
+# NPM and Node.js
+node_modules/
+npm-debug.log
+
+# Other sensitive files
+*.pem
+*.key
+*.crt
+
+# JetBrains Rider
+.idea/
+.idea/.idea/
+
+# Windows-specific
+Thumbs.db
+Desktop.ini
+
+# Mac-specific
+.DS_Store
+
+# Local database files (use this if you have local DB for development)
+app_data/

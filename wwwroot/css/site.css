@@ -19,6 +19,8 @@ html {
 
 body {
   margin-bottom: 60px;
+  padding: 0;
+  position: relative;
 }
 
 /* General form styling */
@@ -75,4 +77,51 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+/* site.css */
+
+/* Basic modal styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Dim the background */
+  display: none;  /* Initially hidden */
+  justify-content: center; /* Center modal content horizontally */
+  align-items: center;  /* Center modal content vertically */
+  z-index: 1000; /* Make sure it's on top of the calendar */
+}
+
+/* Modal content styling */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#closeModal {
+  margin-top: 10px;
+  padding: 5px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#closeModal:hover {
+  background-color: #0056b3;
+}
+
+/* Optional: style for calendar */
+#calendar {
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 20px;
 }
