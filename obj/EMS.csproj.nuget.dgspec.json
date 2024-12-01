@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj": {}
+    "C:\\Users\\Louie\\OneDrive - Texas A&M University-Corpus Christi\\Documents\\Code\\Internet Programming\\EMS\\EMS\\EMS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj": {
+    "C:\\Users\\Louie\\OneDrive - Texas A&M University-Corpus Christi\\Documents\\Code\\Internet Programming\\EMS\\EMS\\EMS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj",
+        "projectUniqueName": "C:\\Users\\Louie\\OneDrive - Texas A&M University-Corpus Christi\\Documents\\Code\\Internet Programming\\EMS\\EMS\\EMS.csproj",
         "projectName": "EMS",
-        "projectPath": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\EMS.csproj",
-        "packagesPath": "C:\\Users\\lflores47\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\lflores47\\OneDrive - Texas A&M University-Corpus Christi\\School\\Code\\Internet Programming\\EMS\\obj\\",
+        "projectPath": "C:\\Users\\Louie\\OneDrive - Texas A&M University-Corpus Christi\\Documents\\Code\\Internet Programming\\EMS\\EMS\\EMS.csproj",
+        "packagesPath": "C:\\Users\\Louie\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Louie\\OneDrive - Texas A&M University-Corpus Christi\\Documents\\Code\\Internet Programming\\EMS\\EMS\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\lflores47\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Louie\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

@@ -1,3 +1,13 @@
+# Using .env  
+  - To use .env create it by duplicating .env.dev and if wanting to change password do so in there for default Admin account, changing name to .env
+  - Example: DEFAULT_ADMIN_EMAIL=admin@admin.com        ADMIN_PASSWORD=StrongPassword123
+
+# Creating the Database
+  - To create the database start by using dotnet ef migrations add
+  - Example: dotnet ef migrations add initialCreate
+
+
+
 # GitHub Branch Naming Conventions
 
 ## Branch Naming Guide

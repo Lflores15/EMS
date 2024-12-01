@@ -62,3 +62,6 @@ Desktop.ini
 
 # Local database files (use this if you have local DB for development)
 app_data/
+
+# Migrations 
+Migrations

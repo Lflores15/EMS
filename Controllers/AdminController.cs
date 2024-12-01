@@ -6,7 +6,8 @@ using EMS.Models;
 
 namespace EMS.Controllers
 {
-    [Authorize(Roles = "Admin")] // Ensure only admins can access this
+    [Authorize]  // Ensure only authenticated users can access this controller
+    [Authorize(Roles = "Admin")]  // Ensure only users with the "Admin" role can access this controller
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
