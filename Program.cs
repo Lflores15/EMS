@@ -1,5 +1,5 @@
-using EMS.Data;
 using EMS.Models;
+using EMS.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv; // For loading environment variables from .env
@@ -7,9 +7,9 @@ using DotNetEnv; // For loading environment variables from .env
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables from the .env file
-Env.Load(); // This loads the .env file into the environment variables
+Env.Load();
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
 
 // Configure Entity Framework and Identity services
@@ -18,32 +18,43 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // Configure Identity to use the custom User class
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.User.RequireUniqueEmail = true;
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
 // Configure session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout in minutes
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Adjust session timeout
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
+// Configure cookie-based authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Set login route and other cookie settings
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Account/Login";  // Redirect for unauthenticated access
+    options.LogoutPath = "/Account/Logout"; // Redirect after logout
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Access denied page
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Set cookie expiration
+    options.SlidingExpiration = true; // Ensure session is extended if active
 });
 
+// Build the application
 var app = builder.Build();
 
-// Ensure the database is created and the default admin user exists
-await EnsureAdminUser(app.Services);
+// Ensure the roles and the database are created, and that the default admin user exists
+await EnsureRolesAndAdminUserAsync(app.Services.CreateScope().ServiceProvider);
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -54,60 +65,86 @@ else
     app.UseHsts();
 }
 
-// Middleware for serving static files (e.g., images, CSS, JS)
+app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-// Enable routing
 app.UseRouting();
+app.UseAuthentication();  // Ensure authentication happens before authorization
+app.UseAuthorization();   // Ensure authorization happens after authentication
+app.UseSession();         // Enable session support
 
-// Use authentication and authorization
-app.UseAuthentication(); // Adds cookie authentication
-app.UseAuthorization();  // Adds authorization middleware
-
-// Enable session middleware
-app.UseSession();
-
-// Map controller routes
+// Default route setup
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 
 app.Run();
 
-// Method to create a default admin user if none exists
-async Task EnsureAdminUser(IServiceProvider services)
+// Ensure roles and a default Admin user are created at startup
+async Task EnsureRolesAndAdminUserAsync(IServiceProvider services)
 {
-    using var scope = services.CreateScope();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    // Check if the "Admin" role exists, create it if not
-    var roleExists = await roleManager.RoleExistsAsync("Admin");
-    if (!roleExists)
+    using (var scope = services.CreateScope())
     {
-        var role = new IdentityRole("Admin");
-        await roleManager.CreateAsync(role);
-    }
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    // Get admin email and password from environment variables
-    var adminEmail = Env.GetString("DEFAULT_ADMIN_EMAIL"); // Load email from .env file
-    var adminPassword = Env.GetString("ADMIN_PASSWORD"); // Load password from .env file
-
-    // Check if the admin user exists, create one if not
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
-    {
-        adminUser = new User
+        // Ensure roles exist
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
         {
-            UserName = adminEmail,
-            Email = adminEmail
-        };
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role == null)
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
 
-        if (result.Succeeded)
+        // Get admin email and password from environment variables
+        var adminEmail = Env.GetString("DEFAULT_ADMIN_EMAIL");
+        var adminPassword = Env.GetString("ADMIN_PASSWORD");
+
+        // Check if the admin email and password are not set
+        if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
         {
-            // Assign the "Admin" role to the new admin user
+            throw new InvalidOperationException("Admin email or password not set in environment variables.");
+        }
+
+        // Check if the admin user already exists
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            // Create the admin user with IsApproved set to true
+            adminUser = new User
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                IsApproved = true, // Admin is approved by default
+                EmailConfirmed = true // Confirm the email
+            };
+
+            var userResult = await userManager.CreateAsync(adminUser, adminPassword);
+            if (!userResult.Succeeded)
+            {
+                throw new Exception($"Error creating Admin user: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+            }
+
+            // Assign the Admin role
             await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+        else
+        {
+            // If the user exists, make sure IsApproved is true
+            if (!adminUser.IsApproved)
+            {
+                adminUser.IsApproved = true;
+                var updateResult = await userManager.UpdateAsync(adminUser);
+                if (!updateResult.Succeeded)
+                {
+                    throw new Exception($"Error updating Admin user approval: {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+                }
+            }
         }
     }
 }
+

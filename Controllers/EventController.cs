@@ -174,11 +174,20 @@ namespace EMS.Controllers
             return _context.Events.Any(e => e.Id == id);
         }
 
-        // GET: Events/Calendar - Only logged-in users can view the calendar
         [Authorize]
         public IActionResult Calendar()
         {
-            var events = _context.Events.ToList(); // Retrieve events to display in the calendar
+            var events = _context.Events
+                .Where(e => e.IsConfirmed == true) // Ensure only confirmed events
+                .ToList();
+
+            // Debugging: Log the retrieved events
+            //Console.WriteLine($"Retrieved {events.Count} confirmed events:");
+            //foreach (var ev in events)
+            //{
+            //Console.WriteLine($"Event: {ev.Name}, Date: {ev.Date}, Organizer: {ev.Organizer}");
+            //}
+
             return View(events);
         }
 
@@ -199,5 +208,44 @@ namespace EMS.Controllers
             TempData["Success"] = isConfirmed ? "Event confirmed." : "Event denied.";
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        [Route("Events/Index")]
+        public async Task<IActionResult> Index(string sortBy, string sortOrder)
+        {
+            // Default values for sortBy and sortOrder
+            if (string.IsNullOrEmpty(sortBy)) sortBy = "Name";
+            if (string.IsNullOrEmpty(sortOrder)) sortOrder = "asc";
+
+            var events = _context.Events.Where(e => e.IsConfirmed == true).AsQueryable();
+
+            switch (sortBy.ToLower())
+            {
+                case "name":
+                    events = sortOrder == "asc" ? events.OrderBy(e => e.Name) : events.OrderByDescending(e => e.Name);
+                    break;
+                case "description":
+                    events = sortOrder == "asc" ? events.OrderBy(e => e.Description) : events.OrderByDescending(e => e.Description);
+                    break;
+                case "date":
+                    events = sortOrder == "asc" ? events.OrderBy(e => e.Date) : events.OrderByDescending(e => e.Date);
+                    break;
+                case "location":
+                    events = sortOrder == "asc" ? events.OrderBy(e => e.Location) : events.OrderByDescending(e => e.Location);
+                    break;
+                case "organizer":
+                    events = sortOrder == "asc" ? events.OrderBy(e => e.Organizer) : events.OrderByDescending(e => e.Organizer);
+                    break;
+                default:
+                    events = events.OrderBy(e => e.Name);
+                    break;
+            }
+
+            ViewData["SortBy"] = sortBy;
+            ViewData["SortOrder"] = sortOrder;
+
+            return View(await events.ToListAsync());
+        }
+
     }
 }

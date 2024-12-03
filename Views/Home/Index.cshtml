@@ -1,43 +1,28 @@
 ﻿@{
-    ViewData["Title"] = "Welcome to EMS";
+    ViewData["Title"] = "Welcome to the Event Management System (EMS)";
 }
 
-<div class="text-center mt-5">
-    <h1 class="display-4">Welcome to the Event Management System</h1>
-    <p class="lead">Effortlessly manage and track your events with our system.</p>
-</div>
-
-<div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h3>Upcoming Events</h3>
-            @if (Model != null && Model.Any())
-            {
-                <ul class="list-group">
-                    @foreach (var evt in Model)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>@evt.Name</strong>
-                                <div class="text-muted">@evt.Date.ToString("MMMM dd, yyyy")</div>
-                            </div>
-                            <span class="badge bg-primary">@evt.Location</span>
-                        </li>
-                    }
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 text-primary font-weight-bold">Welcome to the Event Management System</h1>
+            <p class="lead text-muted">Manage your events with ease. Create, track, and stay updated on all your events with our intuitive platform.</p>
+            
+            <!-- Brief Introduction -->
+            <div class="mb-3">
+                <h3 class="text-dark">Key Features:</h3>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success"></i> Effortless event creation and management.</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Track event dates, locations, and other details.</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Secure and simple to use with user authentication.</li>
                 </ul>
-            }
-            else
-            {
-                <p class="text-muted">No upcoming events at the moment.</p>
-            }
-        </div>
-        <div class="col-md-6">
-            <h3>Actions</h3>
-            <div class="d-grid gap-3">
-                <a class="btn btn-primary btn-lg" asp-controller="Events" asp-action="Calendar">View Calendar</a>
-                <a class="btn btn-success btn-lg" asp-controller="Events" asp-action="Create">Create an Event</a>
+            </div>
+
+            <!-- Sign In / Sign Up buttons -->
+            <div class="d-grid gap-2">
+                <a class="btn btn-primary btn-lg" href="@Url.Action("Login", "Account")">Sign In</a>
+                <a class="btn btn-success btn-lg" href="@Url.Action("Register", "Account")">Create an Account</a>
             </div>
         </div>
     </div>
 </div>
-

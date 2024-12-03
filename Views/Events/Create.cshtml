@@ -21,7 +21,8 @@
         <label for="Location">Event Location</label>
         <input asp-for="Location" class="form-control" id="Location" required />
     </div>
-    <input asp-for="Organizer" type="hidden" value="@User.Identity.Name" /> <!-- Automatically sets the organizer to the current logged-in user -->
-    
+    <input asp-for="Organizer" type="hidden" value="@User.Identity.Name" />
+    <!-- Automatically sets the organizer to the current logged-in user -->
+
     <button type="submit" class="btn btn-primary">Create Event</button>
 </form>

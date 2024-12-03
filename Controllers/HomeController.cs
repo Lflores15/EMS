@@ -4,23 +4,32 @@ namespace EMS.Controllers
 {
     public class HomeController : Controller
     {
-        // Action for the homepage
         public IActionResult Index()
         {
             return View();
         }
 
-        // Action for the privacy page
+        public IActionResult Dashboard()
+        {
+            // Make sure to check if the user is logged in here
+            if (HttpContext.Session.GetString("Username") == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();
         }
 
-        // Action for the error page
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Details()
         {
             return View();
         }
     }
+
 }
+

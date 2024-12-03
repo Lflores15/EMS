@@ -1,19 +1,81 @@
 @model IEnumerable<EMS.Models.Event>
 
 @{
-    ViewData["Title"] = "Event List";
+    ViewData["Title"] = "Confirmed Event List";
 }
 
-<h1>Event List</h1>
+<h1>Confirmed Event List</h1>
 
-<table>
+<p>Only events that are confirmed will be displayed below.</p>
+
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Date</th>
-            <th>Location</th>
-            <th>Organizer</th>
+            <th>
+                <a href="@Url.Action("Index", new { sortBy = "Name", sortOrder = ViewData["SortOrder"] as string == "asc" ? "desc" : "asc" })">
+                    Name
+                    @if (ViewData["SortBy"] as string == "Name" && ViewData["SortOrder"] as string == "asc")
+                    {
+                        <span>&#8593;</span>  <!-- Upward arrow -->
+                    }
+                    else if (ViewData["SortBy"] as string == "Name" && ViewData["SortOrder"] as string == "desc")
+                    {
+                        <span>&#8595;</span>  <!-- Downward arrow -->
+                    }
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("Index", new { sortBy = "Description", sortOrder = ViewData["SortOrder"] as string == "asc" ? "desc" : "asc" })">
+                    Description
+                    @if (ViewData["SortBy"] as string == "Description" && ViewData["SortOrder"] as string == "asc")
+                    {
+                        <span>&#8593;</span>
+                    }
+                    else if (ViewData["SortBy"] as string == "Description" && ViewData["SortOrder"] as string == "desc")
+                    {
+                        <span>&#8595;</span>
+                    }
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("Index", new { sortBy = "Date", sortOrder = ViewData["SortOrder"] as string == "asc" ? "desc" : "asc" })">
+                    Date
+                    @if (ViewData["SortBy"] as string == "Date" && ViewData["SortOrder"] as string == "asc")
+                    {
+                        <span>&#8593;</span>
+                    }
+                    else if (ViewData["SortBy"] as string == "Date" && ViewData["SortOrder"] as string == "desc")
+                    {
+                        <span>&#8595;</span>
+                    }
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("Index", new { sortBy = "Location", sortOrder = ViewData["SortOrder"] as string == "asc" ? "desc" : "asc" })">
+                    Location
+                    @if (ViewData["SortBy"] as string == "Location" && ViewData["SortOrder"] as string == "asc")
+                    {
+                        <span>&#8593;</span>
+                    }
+                    else if (ViewData["SortBy"] as string == "Location" && ViewData["SortOrder"] as string == "desc")
+                    {
+                        <span>&#8595;</span>
+                    }
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("Index", new { sortBy = "Organizer", sortOrder = ViewData["SortOrder"] as string == "asc" ? "desc" : "asc" })">
+                    Organizer
+                    @if (ViewData["SortBy"] as string == "Organizer" && ViewData["SortOrder"] as string == "asc")
+                    {
+                        <span>&#8593;</span>
+                    }
+                    else if (ViewData["SortBy"] as string == "Organizer" && ViewData["SortOrder"] as string == "desc")
+                    {
+                        <span>&#8595;</span>
+                    }
+                </a>
+            </th>
         </tr>
     </thead>
     <tbody>
