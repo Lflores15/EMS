@@ -139,7 +139,9 @@ ul.list-unstyled li i {
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   width: auto;
+  height: auto;
   max-width: 500px;
+  max-height: 500px;
   padding: 25px;
   overflow-y: auto;
 }
