@@ -30,14 +30,15 @@
 
     <script>
         // Serialize events data to JavaScript object from the Model
-        var eventsData = @Html.Raw(Json.Serialize(Model.Select(e => new {
-            id = e.Id,
-            title = e.Name,
-            start = e.Date.ToString("yyyy-MM-ddTHH:mm:ss"), // ISO 8601 format
-            description = e.Description,
-            location = e.Location,
-            organizer = e.Organizer
-        })));
+        var eventsData = @Html.Raw(Json.Serialize(Model.Select(e => new
+            {
+                id = e.Id,
+                title = e.Name,
+                start = e.Date.ToString("yyyy-MM-ddTHH:mm:ss"), // ISO 8601 format
+                description = e.Description,
+                location = e.Location,
+                organizer = e.Organizer
+            })));
 
         // Initialize FullCalendar
         document.addEventListener('DOMContentLoaded', function () {

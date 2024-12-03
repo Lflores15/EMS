@@ -53,7 +53,7 @@ namespace EMS.Controllers
                 {
                     UserName = model.Username,
                     Email = model.Email,
-                    IsApproved = true // Automatically approve new user
+                    IsApproved = false // Automatically denies new user 
                 };
 
                 var result = await _userManager.CreateAsync(newUser, model.Password);
@@ -103,7 +103,7 @@ namespace EMS.Controllers
                     if (user.IsApproved)
                     {
                         var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
-                        
+
                         if (result.Succeeded)
                         {
                             _logger.LogInformation("User logged in: {Email}", model.Email);  // Log login success
@@ -175,9 +175,9 @@ namespace EMS.Controllers
         }
 
         public IActionResult AccessDenied()
-{
-    return View();
-}
+        {
+            return View();
+        }
 
     }
 }

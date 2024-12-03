@@ -3,18 +3,39 @@
     ViewData["Title"] = "Event Details";
 }
 
-<h2>Event Details</h2>
+<div class="container">
+    <header>
+        <h1>Event Details</h1>
+        <p>Details of the selected event</p>
+    </header>
 
-<div>
-    <h3>@Model.Name</h3>   <!-- Updated to 'Name' -->
-    <p><strong>Description:</strong> @Model.Description</p>
-    <p><strong>Date:</strong> @Model.Date.ToString("MMMM dd, yyyy")</p>
-    <p><strong>Location:</strong> @Model.Location</p>
-    <p><strong>Organizer:</strong> @Model.Organizer</p>
+    <div class="card">
+        <div class="card-body">
+            <!-- Event Name -->
+            <h3 class="card-title">@Model.Name</h3>
 
-    <!-- If user can edit, show the edit button -->
-    @if (ViewBag.CanEdit)
-    {
-        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">Edit Event</a>
-    }
+            <!-- Event Description -->
+            <p><strong>Description:</strong> @Model.Description</p>
+
+            <!-- Event Date -->
+            <p><strong>Date:</strong> @Model.Date.ToString("MMMM dd, yyyy")</p>
+
+            <!-- Event Location -->
+            <p><strong>Location:</strong> @Model.Location</p>
+
+            <!-- Event Organizer -->
+            <p><strong>Organizer:</strong> @Model.Organizer</p>
+
+            <!-- Edit Button (if user can edit) -->
+            @if (ViewBag.CanEdit)
+            {
+                <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">Edit Event</a>
+            }
+        </div>
+    </div>
+
+    <!-- Back to Calendar Button (optional) -->
+    <div class="mt-4">
+        <a href="@Url.Action("Index", "Calendar")" class="btn btn-secondary">Back to Calendar</a>
+    </div>
 </div>

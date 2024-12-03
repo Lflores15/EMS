@@ -7,7 +7,7 @@
 <h2>@ViewData["Title"]</h2>
 
 <form asp-action="Login" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>  <!-- Displays all validation errors -->
+    <div asp-validation-summary="All" class="text-danger"></div> <!-- Displays all validation errors -->
 
     <div class="form-group">
         <label asp-for="Email" class="control-label"></label>
@@ -34,6 +34,7 @@
 </p>
 
 @section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-
