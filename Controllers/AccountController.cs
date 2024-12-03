@@ -1,8 +1,10 @@
-using EMS.Data;
 using EMS.Models;
+using EMS.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;  // Add logger
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EMS.Controllers
@@ -13,13 +15,15 @@ namespace EMS.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ILogger<AccountController> _logger;  // Logger for debugging
 
-        public AccountController(ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ILogger<AccountController> logger)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _logger = logger;  // Initialize logger
         }
 
         // GET: /Account/Register
@@ -35,88 +39,100 @@ namespace EMS.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Check if the email is already used
+                // Check if the email already exists in the system
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
-                    ModelState.AddModelError(string.Empty, "An account with this email already exists.");
-                    return View(model);
+                    // Add an error to the model state if the email already exists
+                    ModelState.AddModelError("Email", "An account with this email already exists.");
+                    return View(model);  // Return the view with the error message
                 }
 
+                // Create a new user if no existing user is found
                 var newUser = new User
                 {
-                    UserName = model.Username, // Use the provided Username
-                    Email = model.Email, // Use email for notifications, etc.
+                    UserName = model.Username,
+                    Email = model.Email,
+                    IsApproved = true // Automatically approve new user
                 };
 
                 var result = await _userManager.CreateAsync(newUser, model.Password);
                 if (result.Succeeded)
                 {
-                    // Store the username and email in the session
+                    // Save user info in the session
                     HttpContext.Session.SetString("Email", newUser.Email);
                     HttpContext.Session.SetString("Username", newUser.UserName);
 
-                    // Optionally, add the user to a default role (e.g., "User")
+                    // Add the user to the "User" role
                     await _userManager.AddToRoleAsync(newUser, "User");
+
+                    _logger.LogInformation("User registered successfully: {Email}", newUser.Email);
 
                     return RedirectToAction("SignupSuccessful");
                 }
 
-                // Handle registration errors
+                // Add any other errors from the user creation attempt
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            return View(model);
+            return View(model);  // Return the view with validation errors
         }
 
         // GET: /Account/Login
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            returnUrl ??= Url.Content("~/Home/Dashboard");  // Default redirect to Dashboard
+            ViewData["ReturnUrl"] = returnUrl;  // Pass returnUrl to the view to handle redirects after login
             return View();
         }
 
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(Login model, string? returnUrl = null)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Please enter both email and password.");
-                return View();
-            }
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
-            {
-                // Sign in the user
-                var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
-                if (result.Succeeded)
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
                 {
-                    // Store Username and Email in session
-                    HttpContext.Session.SetString("Email", user.Email);
-                    HttpContext.Session.SetString("Username", user.UserName);
+                    // Check if the user is approved
+                    if (user.IsApproved)
+                    {
+                        var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+                        
+                        if (result.Succeeded)
+                        {
+                            _logger.LogInformation("User logged in: {Email}", model.Email);  // Log login success
+                            // Store session data on successful login
+                            HttpContext.Session.SetString("Email", user.Email);
+                            HttpContext.Session.SetString("Username", user.UserName);
 
-                    return RedirectToAction("LoginSuccessful");
+                            return Redirect(returnUrl ?? "~/Home/Dashboard");  // Redirect to returnUrl or default Dashboard
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Login failed for {Email}: Invalid credentials", model.Email);  // Log login failure reason
+                            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Login failed for {Email}: Account not approved", model.Email);  // Log account not approved
+                        ModelState.AddModelError(string.Empty, "Your account is not approved yet.");
+                    }
                 }
-
-                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+                else
+                {
+                    _logger.LogWarning("Login failed: User not found for {Email}", model.Email);  // Log user not found
+                    ModelState.AddModelError(string.Empty, "User not found.");
+                }
             }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid email or password.");
-            }
 
-            return View();
-        }
-
-        // GET: /Account/LoginSuccessful
-        public IActionResult LoginSuccessful()
-        {
-            return View();
+            return View(model);  // Return the view with validation errors
         }
 
         // GET: /Account/SignupSuccess
@@ -129,14 +145,18 @@ namespace EMS.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            HttpContext.Session.Clear(); // Clear session on logout
-            return RedirectToAction("Index", "Home");
+            HttpContext.Session.Clear();  // Clear session on logout
+            Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+            _logger.LogInformation("User logged out successfully.");
+
+            return RedirectToAction("Login", "Account");
         }
 
         // GET: /Account/AccountDetails
         public async Task<IActionResult> AccountDetails()
         {
-            var username = HttpContext.Session.GetString("Username"); // Retrieve the username from session
+            var username = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
             {
                 return RedirectToAction("Login");
@@ -148,21 +168,16 @@ namespace EMS.Controllers
                 return RedirectToAction("Login");
             }
 
-            // Retrieve the roles for the user
             var roles = await _userManager.GetRolesAsync(user);
-            ViewData["Roles"] = string.Join(", ", roles); // Pass the roles to the view
+            ViewData["Roles"] = string.Join(", ", roles);  // Join roles into a comma-separated string to display
 
-            return View(user);
+            return View(user);  // Pass the user to the view as well
         }
 
-        // Ensure the roles are created at startup if they don't exist
-        private async Task EnsureRolesAsync()
-        {
-            var roleExist = await _roleManager.RoleExistsAsync("User");
-            if (!roleExist)
-            {
-                await _roleManager.CreateAsync(new IdentityRole("User"));
-            }
-        }
+        public IActionResult AccessDenied()
+{
+    return View();
+}
+
     }
 }

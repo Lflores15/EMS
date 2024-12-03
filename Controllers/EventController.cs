@@ -174,11 +174,20 @@ namespace EMS.Controllers
             return _context.Events.Any(e => e.Id == id);
         }
 
-        // GET: Events/Calendar - Only logged-in users can view the calendar
         [Authorize]
         public IActionResult Calendar()
         {
-            var events = _context.Events.ToList(); // Retrieve events to display in the calendar
+            var events = _context.Events
+                .Where(e => e.IsConfirmed == true) // Ensure only confirmed events
+                .ToList();
+
+            // Debugging: Log the retrieved events
+            //Console.WriteLine($"Retrieved {events.Count} confirmed events:");
+            //foreach (var ev in events)
+            //{
+                //Console.WriteLine($"Event: {ev.Name}, Date: {ev.Date}, Organizer: {ev.Organizer}");
+            //}
+
             return View(events);
         }
 

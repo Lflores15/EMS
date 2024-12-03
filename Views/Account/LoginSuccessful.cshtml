@@ -3,6 +3,5 @@
 }
 
 <h2>Login Successful</h2>
-<p>You have successfully logged in. Welcome back!</p>
-
-<a href="@Url.Action("Index", "Home")" class="btn btn-primary">Go to Home</a>
+<p>Welcome back, @Context.Session.GetString("Username")!</p>
+<p><a href="/Home/Dashboard">Go to Dashboard</a></p>

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EMS.Data;
 using EMS.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EMS.Controllers
 {
@@ -17,11 +19,20 @@ namespace EMS.Controllers
             _context = context;
         }
 
-        // GET: Admin - View all events for admin
+        // GET: Admin - View events and users for admin
         public async Task<IActionResult> Index()
         {
+            // Get list of events and users
             var events = await _context.Events.ToListAsync();
-            return View(events);
+            var users = await _context.Users.ToListAsync();
+
+            var viewModel = new AdminDashboardViewModel
+            {
+                Events = events,
+                Users = users
+            };
+
+            return View(viewModel);
         }
 
         // GET: Admin/Edit/5 - Admin can edit events
@@ -100,6 +111,38 @@ namespace EMS.Controllers
             var eventItem = await _context.Events.FindAsync(id);
             _context.Events.Remove(eventItem);
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Admin/ApproveUser/5 - Admin can approve a user
+        public async Task<IActionResult> ApproveUser(string id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsApproved = true;
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Admin/RejectUser/5 - Admin can reject a user
+        public async Task<IActionResult> RejectUser(string id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsApproved = false;
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

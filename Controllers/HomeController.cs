@@ -3,24 +3,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace EMS.Controllers
 {
     public class HomeController : Controller
+{
+    public IActionResult Index()
     {
-        // Action for the homepage
-        public IActionResult Index()
+        return View();
+    }
+
+    public IActionResult Dashboard()
+    {
+        // Make sure to check if the user is logged in here
+        if (HttpContext.Session.GetString("Username") == null)
         {
-            return View();
+            return RedirectToAction("Login", "Account");
         }
 
-        // Action for the privacy page
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        return View();
+    }
 
-        // Action for the error page
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View();
-        }
+    public IActionResult Privacy()
+    {
+        return View();
     }
 }
+
+    }
+

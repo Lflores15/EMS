@@ -1,5 +1,5 @@
-using EMS.Data;
 using EMS.Models;
+using EMS.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv; // For loading environment variables from .env
@@ -20,7 +20,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Configure Identity to use the custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
-        // Optionally customize password and user requirements
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 8;
         options.Password.RequireUppercase = true;
@@ -34,23 +33,26 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 // Configure session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Adjust session timeout
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
+// Configure cookie-based authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Set login route and other cookie settings
-    options.LoginPath = "/Account/Login";  // Path to redirect when not authenticated
-    options.LogoutPath = "/Account/Logout"; // Path to redirect after logout
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Path for access denied errors
+    options.LoginPath = "/Account/Login";  // Redirect for unauthenticated access
+    options.LogoutPath = "/Account/Logout"; // Redirect after logout
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Access denied page
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Set cookie expiration
+    options.SlidingExpiration = true; // Ensure session is extended if active
 });
 
+// Build the application
 var app = builder.Build();
 
-// Ensure the database is created and the default admin user exists
-await EnsureAdminUserAsync(app.Services);
+// Ensure the roles and the database are created, and that the default admin user exists
+await EnsureRolesAndAdminUserAsync(app.Services.CreateScope().ServiceProvider);
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -68,7 +70,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();  // Ensure authentication happens before authorization
 app.UseAuthorization();   // Ensure authorization happens after authentication
-app.UseSession();         // Session management should be last in the order
+app.UseSession();         // Enable session support
 
 // Default route setup
 app.MapControllerRoute(
@@ -78,84 +80,71 @@ app.MapControllerRoute(
 
 app.Run();
 
-/// <summary>
-/// Creates a default Admin role and Admin user if they don't exist.
-/// </summary>
-async Task EnsureAdminUserAsync(IServiceProvider services)
+// Ensure roles and a default Admin user are created at startup
+async Task EnsureRolesAndAdminUserAsync(IServiceProvider services)
 {
-    using var scope = services.CreateScope();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    // Role Name
-    const string adminRole = "Admin";
-
-    // Admin Credentials (from environment variables)
-    var adminEmail = Env.GetString("DEFAULT_ADMIN_EMAIL");
-    var adminPassword = Env.GetString("ADMIN_PASSWORD");
-
-    if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+    using (var scope = services.CreateScope())
     {
-        Console.WriteLine("Admin email or password not found in environment variables. Ensure the .env file contains 'DEFAULT_ADMIN_EMAIL' and 'ADMIN_PASSWORD'.");
-        return;
-    }
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    // Create Admin Role if it doesn't exist
-    if (!await roleManager.RoleExistsAsync(adminRole))
-    {
-        Console.WriteLine($"Creating role: {adminRole}");
-        var roleResult = await roleManager.CreateAsync(new IdentityRole(adminRole));
-        if (!roleResult.Succeeded)
+        // Ensure roles exist
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
         {
-            Console.WriteLine("Error creating Admin role:");
-            foreach (var error in roleResult.Errors)
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role == null)
             {
-                Console.WriteLine($"- {error.Description}");
-            }
-            return;
-        }
-    }
-
-    // Create Admin User if it doesn't exist
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
-    {
-        Console.WriteLine($"Creating admin user with email: {adminEmail}");
-        adminUser = new User
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true // Mark email as confirmed
-        };
-
-        var userResult = await userManager.CreateAsync(adminUser, adminPassword);
-        if (!userResult.Succeeded)
-        {
-            Console.WriteLine("Error creating Admin user:");
-            foreach (var error in userResult.Errors)
-            {
-                Console.WriteLine($"- {error.Description}");
-            }
-            return;
-        }
-    }
-
-    // Ensure Admin User is in Admin Role
-    if (!await userManager.IsInRoleAsync(adminUser, adminRole))
-    {
-        Console.WriteLine($"Adding user {adminEmail} to role {adminRole}");
-        var roleAssignResult = await userManager.AddToRoleAsync(adminUser, adminRole);
-        if (!roleAssignResult.Succeeded)
-        {
-            Console.WriteLine("Error assigning Admin role to user:");
-            foreach (var error in roleAssignResult.Errors)
-            {
-                Console.WriteLine($"- {error.Description}");
+                await roleManager.CreateAsync(new IdentityRole(roleName));
             }
         }
-    }
-    else
-    {
-        Console.WriteLine($"User {adminEmail} is already in role {adminRole}");
+
+        // Get admin email and password from environment variables
+        var adminEmail = Env.GetString("DEFAULT_ADMIN_EMAIL");
+        var adminPassword = Env.GetString("ADMIN_PASSWORD");
+
+        // Check if the admin email and password are not set
+        if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+        {
+            throw new InvalidOperationException("Admin email or password not set in environment variables.");
+        }
+
+        // Check if the admin user already exists
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            // Create the admin user with IsApproved set to true
+            adminUser = new User
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                IsApproved = true, // Admin is approved by default
+                EmailConfirmed = true // Confirm the email
+            };
+
+            var userResult = await userManager.CreateAsync(adminUser, adminPassword);
+            if (!userResult.Succeeded)
+            {
+                throw new Exception($"Error creating Admin user: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+            }
+
+            // Assign the Admin role
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+        else
+        {
+            // If the user exists, make sure IsApproved is true
+            if (!adminUser.IsApproved)
+            {
+                adminUser.IsApproved = true;
+                var updateResult = await userManager.UpdateAsync(adminUser);
+                if (!updateResult.Succeeded)
+                {
+                    throw new Exception($"Error updating Admin user approval: {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+                }
+            }
+        }
     }
 }
+
