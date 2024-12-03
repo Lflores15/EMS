@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Welcome to the Event Management System (EMS)";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 text-primary font-weight-bold">Welcome to the Event Management System</h1>
+            <p class="lead text-muted">Manage your events with ease. Create, track, and stay updated on all your events with our intuitive platform.</p>
+            
+            <!-- Brief Introduction -->
+            <div class="mb-3">
+                <h3 class="text-dark">Key Features:</h3>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success"></i> Effortless event creation and management.</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Track event dates, locations, and other details.</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Secure and simple to use with user authentication.</li>
+                </ul>
+            </div>
+
+            <!-- Sign In / Sign Up buttons -->
+            <div class="d-grid gap-2">
+                <a class="btn btn-primary btn-lg" href="@Url.Action("Login", "Account")">Sign In</a>
+                <a class="btn btn-success btn-lg" href="@Url.Action("Register", "Account")">Create an Account</a>
+            </div>
+        </div>
+    </div>
+</div>

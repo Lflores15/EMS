@@ -1,0 +1,83 @@
+@model IEnumerable<EMS.Models.Event>
+
+@{
+    ViewData["Title"] = "Event Calendar";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- FullCalendar container -->
+<div id="calendar"></div>
+
+<!-- Modal for event details -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <h3 id="eventTitle"></h3>
+        <p><strong>Description:</strong> <span id="eventDescription"></span></p>
+        <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+        <p><strong>Organizer:</strong> <span id="eventOrganizer"></span></p>
+        <button id="closeModal">Close</button>
+    </div>
+</div>
+
+<!-- Background overlay -->
+<div id="modalOverlay" class="modal-overlay"></div>
+
+@section Scripts {
+    <!-- FullCalendar CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+    <script>
+        // Serialize events data to JavaScript object from the Model
+        var eventsData = @Html.Raw(Json.Serialize(Model.Select(e => new {
+            id = e.Id,
+            title = e.Name,
+            start = e.Date.ToString("yyyy-MM-ddTHH:mm:ss"), // ISO 8601 format
+            description = e.Description,
+            location = e.Location,
+            organizer = e.Organizer
+        })));
+
+        // Initialize FullCalendar
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: eventsData, // Use the serialized data directly
+                eventClick: function (info) {
+                    // Populate modal with event details
+                    document.getElementById('eventTitle').innerText = info.event.title;
+                    document.getElementById('eventDescription').innerText = info.event.extendedProps.description;
+                    document.getElementById('eventLocation').innerText = info.event.extendedProps.location;
+                    document.getElementById('eventOrganizer').innerText = info.event.extendedProps.organizer;
+
+                    // Show the modal and the overlay
+                    document.getElementById('eventModal').style.display = 'block';
+                    document.getElementById('modalOverlay').style.display = 'block';
+                }
+            });
+
+            // Render the calendar
+            calendar.render();
+
+            // Close the modal when the user clicks "Close"
+            document.getElementById('closeModal').addEventListener('click', function () {
+                document.getElementById('eventModal').style.display = 'none';
+                document.getElementById('modalOverlay').style.display = 'none';
+            });
+
+            // Close modal when clicking on the overlay
+            document.getElementById('modalOverlay').addEventListener('click', function () {
+                document.getElementById('eventModal').style.display = 'none';
+                document.getElementById('modalOverlay').style.display = 'none';
+            });
+        });
+    </script>
+}

@@ -1,0 +1,31 @@
+@model IEnumerable<EMS.Models.Event>
+
+@{
+    ViewData["Title"] = "Event List";
+}
+
+<h1>Event List</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Organizer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var eventModel in Model)
+        {
+            <tr>
+                <td>@eventModel.Name</td>
+                <td>@eventModel.Description</td>
+                <td>@eventModel.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@eventModel.Location</td>
+                <td>@eventModel.Organizer</td>
+            </tr>
+        }
+    </tbody>
+</table>

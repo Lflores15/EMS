@@ -1,0 +1,85 @@
+@model EMS.Models.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Console - Event Management";
+}
+
+<h2>Admin Console</h2>
+
+<div class="dashboard-container">
+    <!-- Left Column for Events -->
+    <div class="left-column">
+        <h3>Events</h3>
+        <p>
+            <a href="@Url.Action("Create", "Events")" class="btn btn-success">Create New Event</a>
+        </p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Organizer</th>
+                    <th>Confirmed</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var eventItem in Model.Events)
+                {
+                    <tr>
+                        <td>@eventItem.Name</td>
+                        <td>@eventItem.Description</td>
+                        <td>@eventItem.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@eventItem.Location</td>
+                        <td>@eventItem.Organizer</td>
+                        <td>@(eventItem.IsConfirmed ? "Yes" : "No")</td>
+                        <td>
+                            <a href="@Url.Action("Edit", "Admin", new { id = eventItem.Id })" class="btn btn-warning">Edit</a>
+                            <a href="@Url.Action("Delete", "Admin", new { id = eventItem.Id })" class="btn btn-danger">Delete</a>
+                            <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = true })" class="btn btn-success">Confirm</a>
+                            <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = false })" class="btn btn-secondary">Deny</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Right Column for Users -->
+    <div class="right-column">
+        <h3>Users</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                        <td>@(user.IsApproved ? "Approved" : "Pending")</td>
+                        <td>
+                            @if (!user.IsApproved)
+                            {
+                                <a href="@Url.Action("ApproveUser", "Admin", new { id = user.Id })" class="btn btn-success">Approve</a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("RejectUser", "Admin", new { id = user.Id })" class="btn btn-danger">Reject</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

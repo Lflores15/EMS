@@ -1,0 +1,7 @@
+@{
+    ViewData["Title"] = "Login Successful";
+}
+
+<h2>Login Successful</h2>
+<p>Welcome back, @Context.Session.GetString("Username")!</p>
+<p><a href="/Home/Dashboard">Go to Dashboard</a></p>
