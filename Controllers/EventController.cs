@@ -92,11 +92,10 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // POST: Events/Edit/5 - Only the event organizer or admin can edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,Location,Organizer")] Event eventItem)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,Location,Organizer,IsConfirmed")] Event eventItem)
         {
             if (id != eventItem.Id)
             {
@@ -107,14 +106,16 @@ namespace EMS.Controllers
             {
                 try
                 {
-                    // Ensure only the organizer or admin can update
+                    // Ensure the user is authorized to edit the event
                     if (User.Identity.Name != eventItem.Organizer && !User.IsInRole("Admin"))
                     {
                         return Forbid();
                     }
 
+                    // Save the updated event in the database
                     _context.Update(eventItem);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Event updated successfully.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -132,7 +133,8 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // GET: Events/Delete/5 - Only the event organizer or admin can delete
+
+        // Only the event organizer or admin can delete
         [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -157,7 +159,6 @@ namespace EMS.Controllers
             return View(eventItem);
         }
 
-        // POST: Events/Delete/5 - Only the event organizer or admin can delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize]
@@ -191,8 +192,7 @@ namespace EMS.Controllers
             return View(events);
         }
 
-        // New action for admin to confirm or deny events
-        [Authorize(Roles = "Admin")]  // Only admins can confirm/deny events
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ConfirmEvent(int id, bool isConfirmed)
         {
             var eventItem = await _context.Events.FindAsync(id);
@@ -201,14 +201,23 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
-            eventItem.IsConfirmed = isConfirmed;
-            _context.Update(eventItem);
-            await _context.SaveChangesAsync();
+            // Only allow confirming if the event is not already confirmed
+            if (!eventItem.IsConfirmed)
+            {
+                eventItem.IsConfirmed = isConfirmed;
+                _context.Update(eventItem);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = isConfirmed ? "Event confirmed." : "Event denied.";
+            }
+            else
+            {
+                TempData["Error"] = "This event is already confirmed and cannot be updated.";
+            }
 
-            TempData["Success"] = isConfirmed ? "Event confirmed." : "Event denied.";
             return RedirectToAction(nameof(Index));
         }
 
+        // Sorting of list page 
         [HttpGet]
         [Route("Events/Index")]
         public async Task<IActionResult> Index(string sortBy, string sortOrder)
@@ -246,6 +255,7 @@ namespace EMS.Controllers
 
             return View(await events.ToListAsync());
         }
+
 
     }
 }

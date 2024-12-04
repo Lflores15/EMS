@@ -2,7 +2,7 @@
     ViewData["Title"] = "Welcome to the Event Management System (EMS)";
 }
 
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center align-items-center vh-100">
         <div class="col-md-8 text-center">
             <h1 class="display-4 text-primary font-weight-bold">Welcome to the Event Management System</h1>
@@ -18,11 +18,14 @@
                 </ul>
             </div>
 
-            <!-- Sign In / Sign Up buttons -->
-            <div class="d-grid gap-2">
-                <a class="btn btn-primary btn-lg" href="@Url.Action("Login", "Account")">Sign In</a>
-                <a class="btn btn-success btn-lg" href="@Url.Action("Register", "Account")">Create an Account</a>
-            </div>
+            <!-- Conditionally render Sign In / Sign Up buttons -->
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <div class="d-grid gap-2">
+                    <a class="btn btn-primary btn-lg" href="@Url.Action("Login", "Account")">Sign In</a>
+                    <a class="btn btn-success btn-lg" href="@Url.Action("Register", "Account")">Create an Account</a>
+                </div>
+            }
         </div>
     </div>
 </div>

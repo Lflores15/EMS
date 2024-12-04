@@ -37,7 +37,7 @@
                         <td>@eventItem.Organizer</td>
                         <td>@(eventItem.IsConfirmed ? "Yes" : "No")</td>
                         <td>
-                            <a href="@Url.Action("Edit", "Admin", new { id = eventItem.Id })" class="btn btn-warning">Edit</a>
+                            <a href="@Url.Action("Edit", "Events", new { id = eventItem.Id })" class="btn btn-warning">Edit</a>
                             <a href="@Url.Action("Delete", "Admin", new { id = eventItem.Id })" class="btn btn-danger">Delete</a>
                             <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = true })" class="btn btn-success">Confirm</a>
                             <a href="@Url.Action("ConfirmEvent", "Events", new { id = eventItem.Id, isConfirmed = false })" class="btn btn-secondary">Deny</a>
