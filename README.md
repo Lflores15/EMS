@@ -34,3 +34,19 @@ Notes:
     ```
     dotnet add package Microsoft.EntityFrameworkCore.Tools
     ```
+
+## Building and Running the Application
+
+### Build the Application
+
+1. Compile the application using the following command:
+    ```
+    dotnet build EMS.csproj
+    ```
+
+2. Start the application with:
+    ```
+    dotnet run
+    ```
+
+3. Once the application is running, navigate to the provided URL (e.g., http://localhost:5000) in your web browser to access it.
