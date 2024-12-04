@@ -119,9 +119,12 @@ ul.list-unstyled li i {
 
 /* Align the Sign In and Register buttons */
 .d-grid {
-  display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.d-grid a {
+  padding: 15px;
+  font-size: 1.2rem;
 }
 
 /* Modal Styles */
@@ -133,12 +136,12 @@ ul.list-unstyled li i {
   transform: translate(-50%, -50%);
   z-index: 1050;
   background-color: white;
-  border-radius: 12 px;
+  border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   width: auto;
   height: auto;
-  max-width: 90%; /* Adjust for mobile */
-  max-height: 90%; /* Adjust for mobile */
+  max-width: 500px;
+  max-height: 500px;
   padding: 25px;
   overflow-y: auto;
 }
@@ -153,7 +156,7 @@ ul.list-unstyled li i {
 }
 
 .modal-content p {
-  font-size: 16px;
+  font-size:  16px;
   margin-bottom: 10px;
 }
 
@@ -198,39 +201,15 @@ footer a:hover {
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
-    padding: 20px;
-  }
-
-  header h1 {
-    font-size: 2rem;
+    padding: 30px 20px;
   }
 
   .btn {
-    font-size: 1rem;
-    padding: 10px 20px;
-  }
-
-  .event-table th,
-  .event-table td {
-    padding: 10px;
-  }
-
-  .event-table td {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
 
   .d-grid {
     gap: 15px;
-    grid-template-columns: 1fr; /* Stack buttons on small screens */
-  }
-
-  nav {
-    padding: 10px 15px; /* Adjust padding for mobile */
-  }
-
-  nav a {
-    padding: 10px 15px; /* Adjust link padding for mobile */
-    margin: 0 10px; /* Adjust margin for mobile */
   }
 }
 
@@ -296,4 +275,29 @@ footer a:hover {
 .btn:hover {
   background-color: #2980b9;
   transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .event-table th,
+  .event-table td {
+    padding: 10px;
+  }
+
+  .event-table td {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
 }
