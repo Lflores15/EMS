@@ -20,7 +20,6 @@
     </div>
 </div>
 
-<!-- Background overlay -->
 <div id="modalOverlay" class="modal-overlay"></div>
 
 @section Scripts {
@@ -29,7 +28,6 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
     <script>
-        // Serialize events data to JavaScript object from the Model
         var eventsData = @Html.Raw(Json.Serialize(Model.Select(e => new
             {
                 id = e.Id,
@@ -51,7 +49,7 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                events: eventsData, // Use the serialized data directly
+                events: eventsData, 
                 eventClick: function (info) {
                     // Populate modal with event details
                     document.getElementById('eventTitle').innerText = info.event.title;

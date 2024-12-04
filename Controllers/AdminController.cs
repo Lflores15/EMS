@@ -35,55 +35,6 @@ namespace EMS.Controllers
             return View(viewModel);
         }
 
-        // GET: Admin/Edit/5 - Admin can edit events
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var eventItem = await _context.Events.FindAsync(id);
-            if (eventItem == null)
-            {
-                return NotFound();
-            }
-
-            return View(eventItem);
-        }
-
-        // POST: Admin/Edit/5 - Admin edits the event
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Date,Location,Organizer,IsConfirmed")] Event eventItem)
-        {
-            if (id != eventItem.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(eventItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EventExists(eventItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(eventItem);
-        }
 
         // GET: Admin/Delete/5 - Admin can delete events
         public async Task<IActionResult> Delete(int? id)
@@ -150,5 +101,25 @@ namespace EMS.Controllers
         {
             return _context.Events.Any(e => e.Id == id);
         }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ConfirmEvent(int id, bool isConfirmed)
+        {
+            var eventItem = await _context.Events.FindAsync(id);
+            if (eventItem == null)
+            {
+                return NotFound();
+            }
+
+            eventItem.IsConfirmed = isConfirmed;
+            _context.Update(eventItem);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = isConfirmed ? "Event confirmed." : "Event denied.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        
+
     }
 }
