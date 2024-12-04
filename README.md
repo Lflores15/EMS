@@ -1,6 +1,6 @@
 # Using .env  
   - To use .env create it by duplicating .env.dev and if wanting to change password do so in there for default Admin account, changing name to .env
-  - Example: **DEFAULT_ADMIN_EMAIL=**admin@admin.com        **ADMIN_PASSWORD=**StrongPassword123
+  - Example: DEFAULT_ADMIN_EMAIL=admin@admin.com        ADMIN_PASSWORD=StrongPassword123
 
 # Creating Database
   1. Add a Migration
