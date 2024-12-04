@@ -1,0 +1,5 @@
+cd C:\Caddy
+
+set DUCKDNS_TOKEN=80368827-b951-4958-bd0c-c88d63fe5168
+
+caddy_windows_amd64_custom.exe run

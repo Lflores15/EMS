@@ -1,0 +1,6 @@
+emsproject.duckdns.org {
+	reverse_proxy local host:5159 (CHANGE THIS TO YOUR IP)
+	tls {
+		dns duckdns {env.DUCKDNS_TOKEN}
+	}
+}
